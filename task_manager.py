@@ -271,21 +271,25 @@ def display_statistics(task_list, username_password):
         generate_task_report(task_list)
         generate_user_report(task_list, username_password)
 
-    # Display statistics from the data files
-    with open("tasks.txt", "r") as task_file:
-        task_data = task_file.read().split("\n")
-        num_tasks = len([t for t in task_data if t != ""])
-        completed_tasks = sum(1 for t in task_data if t.endswith("Yes"))
-        incomplete_tasks = num_tasks - completed_tasks
-        overdue_tasks = sum(1 for t in task_data if not t.endswith("Yes") and datetime.strptime(t.split(";")[3], DATETIME_STRING_FORMAT).date() < date.today())
+    # Display statistics from the task_list
+    num_tasks = len(task_list)
+    completed_tasks = sum(1 for task in task_list if task['completed'])
+    incomplete_tasks = num_tasks - completed_tasks
+    
+    # Calculate overdue tasks
+    overdue_tasks = sum(1 for task in task_list if not task['completed'] and task['due_date'].date() < date.today())
 
-        print("Task Overview Report:")
-        print(f"Total tasks: {num_tasks}")
-        print(f"Completed tasks: {completed_tasks}")
-        print(f"Incomplete tasks: {incomplete_tasks}")
-        print(f"Overdue tasks: {overdue_tasks}")
+    print("Task Overview Report:")
+    print(f"Total tasks: {num_tasks}")
+    print(f"Completed tasks: {completed_tasks}")
+    print(f"Incomplete tasks: {incomplete_tasks}")
+    print(f"Overdue tasks: {overdue_tasks}")
+
+    if num_tasks > 0:
         print(f"Percentage of incomplete tasks: {incomplete_tasks / num_tasks * 100:.2f}%")
         print(f"Percentage of overdue tasks: {overdue_tasks / num_tasks * 100:.2f}%")
+    else:
+        print("There are no tasks to display statistics for.")
 
     with open("user.txt", "r") as user_file:
         user_data = user_file.read().split("\n")
@@ -304,10 +308,22 @@ def display_statistics(task_list, username_password):
 
             print(f"\nUser: {username}")
             print(f"Total tasks assigned: {total_user_tasks}")
-            print(f"Percentage of total tasks assigned: {total_user_tasks / num_tasks * 100:.2f}%")
-            print(f"Percentage of completed tasks: {completed_user_tasks / total_user_tasks * 100:.2f}%")
-            print(f"Percentage of incomplete tasks: {incomplete_user_tasks / total_user_tasks * 100:.2f}%")
-            print(f"Percentage of overdue tasks: {overdue_user_tasks / total_user_tasks * 100:.2f}%")
+            
+            # Check if num_tasks is greater than zero before calculating the percentage
+            if num_tasks > 0:
+                print(f"Percentage of total tasks assigned: {total_user_tasks / num_tasks * 100:.2f}%")
+            else:
+                print("Percentage of total tasks assigned: 0.00%")
+                
+            # Check if total_user_tasks is greater than zero before calculating the percentage
+            if total_user_tasks > 0:
+                print(f"Percentage of completed tasks: {completed_user_tasks / total_user_tasks * 100:.2f}%")
+                print(f"Percentage of incomplete tasks: {incomplete_user_tasks / total_user_tasks * 100:.2f}%")
+                print(f"Percentage of overdue tasks: {overdue_user_tasks / total_user_tasks * 100:.2f}%")
+            else:
+                print("Percentage of completed tasks: 0.00%")
+                print("Percentage of incomplete tasks: 0.00%")
+                print("Percentage of overdue tasks: 0.00%")
 
 # Main Loop
 while True:
